@@ -19,3 +19,6 @@ def index(request):
 
 def post(request):
     return render(request, 'post.html')
+
+def HoverCards(request):
+    return render(request, 'Hover Cards/index.html')
