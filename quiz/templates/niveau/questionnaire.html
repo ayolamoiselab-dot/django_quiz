@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Questionnaires</title>
+    <link rel="stylesheet" href="/static/quiz/css/questionnaire.css" />
+</head>
+<body>
+
+    <h2>Questionnaires pour la catégorie : {{ category.titre }}</h2>
+
+    <div class="card-container">
+        {% for questionnaire in questionnaires %}
+            <div class="card">
+                <h3>{{ questionnaire.titre }}</h3>
+                <p>Date de création : {{ questionnaire.date_creation|date:"d-m-Y" }}</p>
+                <a href="{% url 'questions_by_questionnaire' questionnaire.id_questionnaire %}" class="btn btn-primary">Voir les questions</a>
+            </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

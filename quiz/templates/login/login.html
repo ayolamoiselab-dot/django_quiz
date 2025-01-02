@@ -1,0 +1,18 @@
+<link href="/static/quiz/css/login.css" rel="stylesheet" />
+<div class="container-login">
+    <p class="heading">Login</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="box">
+            <p>Username</p>
+            <input type="text" name="username" placeholder="Enter Your Username">
+        </div>
+        <div class="box">
+            <p>Password</p>
+            <input type="password" name="password" placeholder="Enter Your Password">
+        </div>
+        <button class="loginBtn" type="submit">Login</button>
+    </form>
+    <p class="text">Don't have an account? <a href="/signup/">Sign up</a></p>
+</div>
+

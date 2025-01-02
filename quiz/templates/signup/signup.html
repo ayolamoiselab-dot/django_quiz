@@ -1,0 +1,11 @@
+<link href="/static/quiz/css/signup.css" rel="stylesheet" />
+<div class="container">
+    <p class="heading">Sign Up</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="loginBtn" type="submit">Sign Up</button>
+    </form>
+    <p class="text">Already have an account? <a href="/login/">Login</a></p>
+</div>
+

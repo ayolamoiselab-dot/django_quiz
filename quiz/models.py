@@ -1,9 +1,5 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-
-
-# Create your models here.
+from django.contrib.auth.models import AbstractUser
 
 # Modèle pour la catégorie de quiz
 class CategorieQuiz(models.Model):
@@ -12,60 +8,56 @@ class CategorieQuiz(models.Model):
     description = models.TextField()
     auteur = models.CharField(max_length=255)
     date_creation = models.DateTimeField(auto_now_add=True)
+    icon = models.CharField(max_length=50, blank=True)  # Code de l'icône Font Awesome (e.g., "fa-user-alt")
 
-    def ajouter_questionnaire(self):
-        pass  # A complèter
 
-    def supprimer_questionnaire(self):
-        pass  # A complèter
+    def __str__(self):
+        return self.titre
 
-    def modifier_questionnaire(self):
-        pass  # A complèter
-
-    def obtenir_resultat(self):
-        pass  # A complèter
 
 # Modèle pour le questionnaire
 class Questionnaire(models.Model):
     id_questionnaire = models.AutoField(primary_key=True)
-    titre = models.CharField(max_length=255, unique=True)
+    titre = models.CharField(max_length=255)
+    categorie = models.ForeignKey(
+        CategorieQuiz, on_delete=models.CASCADE, related_name="questionnaires"
+    )
     date_creation = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
-    categorie = models.ForeignKey(CategorieQuiz, on_delete=models.CASCADE, related_name="questionnaires")
 
-    def ajouter_question(self):
-        pass  # A complèter
+    class Meta:
+        unique_together = ('titre', 'categorie')  # Contraintes d'unicité
 
-    def supprimer_question(self):
-        pass  # A complèter
+    def __str__(self):
+        return f"{self.titre} ({self.categorie.titre})"
 
-    def modifier_questionnaire(self):
-        pass  # A complèter
 
 # Modèle pour les questions
 class Question(models.Model):
     id_question = models.AutoField(primary_key=True)
     texte = models.TextField()
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name="questions")
+    questionnaire = models.ForeignKey(
+        Questionnaire, on_delete=models.CASCADE, related_name="questions"
+    )
 
-    def ajouter_choix(self):
-        pass  # A complèter
-    def definir_reponse_correcte(self):
-        pass  # A complèter
+    def __str__(self):
+        return self.texte
 
-    def obtenir_choix(self):
-        pass  # A complèter
 
 # Modèle pour les choix de réponses
 class Choix(models.Model):
     id_choix = models.AutoField(primary_key=True)
     texte = models.CharField(max_length=255)
     est_correct = models.BooleanField(default=False)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="choix")
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="choix"
+    )
 
-    def est_correct(self):
-        return self.est_correct
+    def __str__(self):
+        return self.texte
 
+
+# Modèle utilisateur personnalisé
 # Modèle utilisateur (extension d'AbstractUser pour inclure plus de champs)
 class User(AbstractUser):
     id_user = models.AutoField(primary_key=True)
@@ -73,38 +65,37 @@ class User(AbstractUser):
     # Ajoute des noms de relations inversées uniques pour éviter les conflits
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='custom_user_set',
+        related_name='custom_user_set',  # Nom de relation unique
         blank=True,
         help_text='The groups this user belongs to.',
         verbose_name='groups',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='custom_user_permissions_set',
+        related_name='custom_user_permissions_set',  # Nom de relation unique
         blank=True,
         help_text='Specific permissions for this user.',
         verbose_name='user permissions',
     )
+
+
 # Modèle pour le profil utilisateur
 class UserProfil(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profil")
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="profil"
+    )
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    def get_quiz_results(self):
-        return self.user.resultat_quiz.all()
-
-    def get_progress(self):
-        pass  # A complèter
 
 # Modèle pour les résultats des quiz
 class ResultatQuiz(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="resultat_quiz")
-    categorie = models.ForeignKey(CategorieQuiz, on_delete=models.CASCADE, related_name="resultats")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="resultat_quiz"
+    )
+    categorie = models.ForeignKey(
+        CategorieQuiz, on_delete=models.CASCADE, related_name="resultats"
+    )
     score = models.FloatField()
     date_passage = models.DateTimeField(auto_now_add=True)
 
-    def calculer_score(self):
-        pass  # A complèter
 
-    def obtenir_statistique(self):
-        pass  # A complèter

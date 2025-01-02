@@ -1,0 +1,98 @@
+/* Styles généraux */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container principal */
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Titre */
+.heading {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Champs de formulaire */
+.box {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.box p {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Champs de saisie (input) */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+/* Champs de saisie (focus effect) */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Bouton de sign-up */
+.loginBtn {
+    background-color: #28a745; /* Vert pour inscription */
+    color: white;
+    padding: 12px;
+    font-size: 1rem;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect pour le bouton de sign-up */
+.loginBtn:hover {
+    background-color: #218838;
+}
+
+/* Texte sous le formulaire */
+.text {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Lien "Login" */
+.text a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.text a:hover {
+    text-decoration: underline;
+}

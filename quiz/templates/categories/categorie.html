@@ -1,0 +1,18 @@
+<link href="/static/quiz/css/categorie.css" rel="stylesheet" />
+
+  {% for category in categories %}
+  <div class="card">
+      <div class="icon">
+          <i class="fas {{ category.icon }}"></i>
+      </div>
+      <h4>{{ category.titre }}</h4>
+      <p>{{ category.description }}</p>
+      <small>Créé par : {{ category.auteur }} le {{ category.date_creation|date:"d-m-Y" }}</small>
+      
+      <!-- Bouton pour accéder aux questionnaires -->
+      <a href="{% url 'questionnaires_by_category' category.id_cat %}" class="btn btn-primary">Voir les questionnaires</a>
+  </div>
+{% endfor %}
+
+
+

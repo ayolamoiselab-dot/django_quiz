@@ -1,0 +1,75 @@
+
+<link href="/static/quiz/css/questions.css" rel="stylesheet" />
+
+<h2>Questions pour le questionnaire : {{ questionnaire.titre }}</h2>
+<div id="question-container">
+    {% for question in questions %}
+        <div class="question" id="question-{{ forloop.counter }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+            <h3>{{ question.texte }}</h3>
+            <ul>
+                {% for choix in question.choix.all %}
+                    <li>
+                        <button onclick="checkAnswer(this, {{ choix.est_correct|yesno:'true,false' }})">
+                            {{ choix.texte }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+<div class="navigation">
+    <button id="prev" onclick="prevQuestion()" disabled>Précédent</button>
+    <button id="next" onclick="nextQuestion()">Suivant</button>
+</div>
+<script>
+    let currentQuestion = 1;
+    const totalQuestions = {{ questions|length }};
+    
+    // Fonction pour afficher la question en cours
+    function showQuestion(index) {
+        const questions = document.querySelectorAll('.question');
+        questions.forEach((question, idx) => {
+            question.classList.remove('show');
+            if (idx + 1 === index) {
+                question.classList.add('show');
+            }
+        });
+    
+        // Gérer l'état des boutons de navigation
+        document.getElementById("prev").disabled = index === 1;
+        document.getElementById("next").disabled = index === totalQuestions;
+    }
+    
+    // Fonction pour passer à la question suivante
+    function nextQuestion() {
+        if (currentQuestion < totalQuestions) {
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+    }
+    
+    // Fonction pour revenir à la question précédente
+    function prevQuestion() {
+        if (currentQuestion > 1) {
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        }
+    }
+    
+    // Fonction pour vérifier la réponse
+    function checkAnswer(button, isCorrect) {
+        if (isCorrect) {
+            button.style.backgroundColor = "green";
+            alert("Bonne réponse !");
+        } else {
+            button.style.backgroundColor = "red";
+            alert("Mauvaise réponse !");
+        }
+        button.disabled = true;
+    }
+    
+    // Initialiser l'affichage de la première question
+    showQuestion(currentQuestion);
+    
+</script>
