@@ -67,7 +67,8 @@ def resultats_par_niveau(request, category_id, niveau):
 
     # Récupération du score de la requête GET
     score = int(request.GET.get('score', 0))
-    score_max = 100
+    score_max = questionnaire.questions.count()
+
     pourcentage = (score / score_max) * 100 if score_max > 0 else 0
 
     # Sauvegarde ou mise à jour du résultat

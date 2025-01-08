@@ -5,16 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ajouter une Catégorie - Quiz App</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 </head>
 <body class="bg-gradient-to-r from-pink-400 via-pink-500 to-indigo-600 min-h-screen">
-  <nav class="bg-gray-800 p-4 text-white fixed top-0 left-0 w-full z-10 shadow-lg">
+  <nav class="bg-gray-800 p-4 text-white w-full fixed top-0 left-0 z-10">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="text-2xl font-bold">Quiz App</a>
+      <a href="{% url 'home' %}" class="text-2xl font-bold">QuizIZI</a>
       <ul class="flex space-x-6">
-        <li><a href="{% url 'home' %}" class="hover:text-gray-300">Accueil</a></li>
-        <li><a href="{% url 'category_list' %}" class="hover:text-gray-300">Catégories</a></li>
-        <li><a href="{% url 'profile' %}" class="hover:text-gray-300">Profil</a></li>
-        <li><a href="{% url 'ajouter_quiz' %}" class="hover:text-gray-300">Ajouter Quiz</a></li>
+        <a href="{% url 'home' %}" class="text-white hover:text-gray-300 mx-4">Accueil</a>
+        <a href="{% url 'category_list' %}" class="text-white hover:text-gray-300 mx-4">Catégories</a>
+        <a href="{% url 'ajouter_quiz' %}" class="text-white hover:text-gray-300 mx-4">Ajouter un Quiz</a>
+        <li class="relative">
+            <a href="#" class="text-white hover:text-gray-300 mx-4 flex items-center" id="userDropdown" aria-expanded="false">
+              <i class="fas fa-user-circle mr-2"></i> {{ user.username }}
+            </a>
+            <ul class="dropdown-menu absolute right-0 hidden bg-white text-gray-800 rounded-lg shadow-lg w-48 mt-2 py-2" aria-labelledby="userDropdown">
+              <li>
+                <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'profile' %}">
+                  <i class="fas fa-user mr-2"></i> Profile
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'logout' %}">
+                  <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+        </li>
       </ul>
     </div>
   </nav>
@@ -70,6 +89,14 @@
       </form>
     </div>
   </div>
+
+  <script>
+    document.getElementById('userDropdown').addEventListener('click', function (event) {
+      event.preventDefault();
+      const dropdownMenu = event.target.nextElementSibling;
+      dropdownMenu.classList.toggle('hidden');
+    });
+  </script>
 
 </body>
 </html>

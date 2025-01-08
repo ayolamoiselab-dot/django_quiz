@@ -1,87 +1,68 @@
+                                                                                      
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résultats</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        ul li {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f4f4f4;
-            border-radius: 4px;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            text-decoration: none;
-            color: #fff;
-            margin-top: 20px;
-            border-radius: 4px;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Score - Quiz App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600 min-h-screen flex items-center justify-center">
+  <!-- Conteneur principal -->
+  <div class="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full text-center">
+    <!-- Titre -->
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Résultat du Quiz</h1>
 
-<body>
-    <div class="container">
-        <h2>Résultats pour le niveau {{ niveau|capfirst }} de la catégorie {{ categorie.titre }}</h2>
-        <ul>
-            <li><strong>Score obtenu :</strong> {{ score }}</li>
-            <li><strong>Score maximum :</strong> {{ score_max }}</li>
-            <li><strong>Pourcentage :</strong> {{ pourcentage|floatformat:2 }}%</li>
-        </ul>
-    
-       
-        <a href="{% url 'questionnaires_by_category' categorie.id_cat %}" class="btn btn-success">
-            Niveau suivant {{ niveau_suivant }}
- 
-        </a>
-
-      
-    
+    <!-- Message personnalisé -->
+    <div id="result-message" class="mb-6">
+      <p class="text-lg text-gray-700 font-medium">
+        Félicitations 🎉, vous avez obtenu :
+      </p>
     </div>
-    
-</body>
 
-</html>
+    <!-- Affichage du score -->
+    <div class="bg-green-100 text-green-700 font-bold text-5xl py-6 px-4 rounded-lg shadow-inner mb-6">
+      <span id="score"> {{ score }}</span> / <span id="total">{{ score_max }}</span>
+    </div>
+
+    <!-- Message encouragement si le score est faible -->
+    <div id="encouragement-message" class="hidden text-gray-600 text-sm mb-6">
+      Ne vous découragez pas, continuez à vous entraîner !
+    </div>
+
+    <!-- Boutons -->
+    <div class="flex justify-center space-x-4">
+      <button 
+        id="retryBtn" 
+        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none">
+        Niveau suivant {{ niveau_suivant }}
+      </button>
+      
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    // Variables pour le score et le total
+    const score = {{ score|default:0|safe }}; // Utilisez |default pour éviter les erreurs si score n'est pas défini
+    const total = {{ score_max|default:1|safe }}; // Évitez la division par zéro
+
+    // Mettez à jour les éléments de la page
+    document.getElementById('score').textContent = score;
+    document.getElementById('total').textContent = total;
+
+    // Afficher un message personnalisé en fonction du score
+    const resultMessage = document.getElementById('result-message');
+    const encouragementMessage = document.getElementById('encouragement-message');
+
+    if (score / total >= 0.7) {
+        resultMessage.innerHTML = '<p class="text-lg text-gray-700 font-medium">Bravo 🎉, vous avez réussi !</p>';
+    } else {
+        encouragementMessage.classList.remove('hidden');
+    }
+
+    document.getElementById('retryBtn').addEventListener('click', () => {
+    window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}";
+});
+
+</script>

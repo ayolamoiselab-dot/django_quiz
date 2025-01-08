@@ -16,7 +16,7 @@
       <ul class="flex space-x-6">
         <a href="{% url 'home' %}" class="text-white hover:text-gray-600 mx-4">Accueil</a>
         <a href="{% url 'category_list' %}" class="text-white hover:text-gray-600 mx-4">Catégories</a>
-        <a href="ajouter_quiz.html" class="text-white hover:text-gray-600 mx-4">Ajouter un Quiz</a>
+        <a href="{% url 'ajouter_quiz' %}" class="text-white hover:text-gray-600 mx-4">Ajouter un Quiz</a>
         <li class="relative">
           <a href="#" class="text-white hover:text-gray-600 mx-4 flex items-center" id="userDropdown" aria-expanded="false">
             <i class="fas fa-user-circle mr-2"></i> {{ user.username }}
