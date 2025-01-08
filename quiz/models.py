@@ -134,3 +134,15 @@ class ResultatQuiz(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.categorie.titre} ({self.niveau})  {self.score_cat}%"
+    
+class TemporaryCategory(models.Model):
+    titre = models.CharField(max_length=255)
+    description = models.TextField()
+    niveau = models.CharField(max_length=50, choices=[('facile', 'Facile'), ('moyen', 'Moyen'), ('difficile', 'Difficile')])
+    nombre_questions = models.IntegerField()
+    auteur = models.ForeignKey(User, on_delete=models.CASCADE)
+    approuve = models.BooleanField(default=False)  # Champ pour approuver ou refuser la catégorie
+    date_soumission = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.titre

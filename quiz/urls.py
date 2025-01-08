@@ -18,5 +18,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('ajouter_quiz/', views.ajouter_quiz, name='ajouter_quiz'),
     path('ajouter_quiz/', views.ajouter_quiz, name='ajouter_quiz'),
+    
+    path('get_niveaux/<int:categorie_id>/', views.get_niveaux, name='get_niveaux'),
+    path('ajouter_question/', views.ajouter_question, name='ajouter_question'),
    
 ]

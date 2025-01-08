@@ -7,6 +7,12 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import CategorieQuiz, Questionnaire, ResultatQuiz, Question, Choix
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from .forms import TemporaryCategoryForm
+from .models import TemporaryCategory
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 # Create your views here.
@@ -115,10 +121,17 @@ def profile(request):
     user = request.user
     resultats_par_categorie = {}
 
-    # Exemple de récupération des résultats de l'utilisateur par catégorie
+    # Récupération des résultats de l'utilisateur par catégorie
     resultats = ResultatQuiz.objects.filter(user=user)
     
-    # Récupération des résultats par catégorie et niveau
+    # Calculer le nombre de demandes en attente de cet utilisateur
+    demande_en_attente = TemporaryCategory.objects.filter(auteur=user, approuve=False).count()
+    
+    # Récupérer les catégories créées par l'utilisateur ou auxquelles il a participé
+    categories_utilisateur = CategorieQuiz.objects.filter(auteur=user)
+
+
+    # Organisation des résultats par catégorie et niveau
     for resultat in resultats:
         categorie = resultat.categorie
         niveau = resultat.niveau
@@ -127,55 +140,88 @@ def profile(request):
         if niveau not in resultats_par_categorie[categorie]:
             resultats_par_categorie[categorie][niveau] = []
         resultats_par_categorie[categorie][niveau].append(resultat)
-    
-    # Autres informations pour le profil
+
+    # Informations pour le profil
     total_quiz_joues = resultats.count()
-    dernier_quiz = resultats.last().categorie.titre if resultats else "Aucun"
+    dernier_quiz = resultats.last()  # Dernier résultat basé sur la date de passage
+    dernier_quiz_titre = dernier_quiz.categorie.titre if dernier_quiz else "Aucun"
+    dernier_quiz_date = dernier_quiz.date_passage if dernier_quiz else None
 
     context = {
         'user': user,
         'resultats_par_categorie': resultats_par_categorie,
         'total_quiz_joues': total_quiz_joues,
-        'dernier_quiz': dernier_quiz,
+        'dernier_quiz_titre': dernier_quiz_titre,
+        'dernier_quiz_date': dernier_quiz_date,
+        'demande_en_attente': demande_en_attente,
+        'categories_utilisateur': categories_utilisateur,  # Passer les catégories auxquelles l'utilisateur est lié
     }
 
     return render(request, 'Profil/profil.html', context)
 
+
 @login_required
 def ajouter_quiz(request):
     if request.method == 'POST':
-        # Récupération des informations du formulaire
-        titre_quiz = request.POST['quizTitle']
-        description_quiz = request.POST['quizDescription']
-        niveau_quiz = request.POST['quizLevel']
-        nombre_questions = int(request.POST['quizQuestions'])
-        categorie_quiz_id = request.POST['quizCategory']
-        categorie_quiz = CategorieQuiz.objects.get(id_cat=categorie_quiz_id)
+        form = TemporaryCategoryForm(request.POST)
+        if form.is_valid():
+            # Enregistrer la catégorie comme une proposition temporaire
+            categorie = form.save(commit=False)
+            categorie.auteur = request.user  # L'utilisateur connecté devient l'auteur
+            categorie.save()
+            # Ajouter un message de succès
+            messages.success(request, "Demande Soumise !!!! En attente d'approbation...")
+            return redirect('ajouter_quiz')  # Redirige vers une page de confirmation ou de liste des catégories
 
-        # Création du questionnaire
-        questionnaire = Questionnaire.objects.create(
-            titre=titre_quiz,
-            description=description_quiz,
-            niveau=niveau_quiz,
-            categorie=categorie_quiz,
-            auteur=request.user.username
-        )
+    else:
+        form = TemporaryCategoryForm()
 
-        # Redirection après la création du quiz
-        return redirect('quiz:category_list')  # Remplacez avec l'URL appropriée pour la liste des quiz
-
-    # Récupérer les catégories et les niveaux du formulaire
-    categories = CategorieQuiz.objects.all()
-    niveaux = ['facile', 'intermediaire', 'avance']
-
-    # Vérification des niveaux avant de les passer au template
-    print("Niveaux disponibles : ", niveaux)
-
-    return render(request, 'Ajout_Quiz/ajout_Quiz.html', {
-        'categories': categories,
-        'niveaux': niveaux
-    })
+    return render(request, 'Ajout_Quiz/ajout_Quiz.html', {'form': form})
 
 
 
+@csrf_exempt  # Ajouté pour permettre les requêtes POST avec un token CSRF
+def ajouter_question(request):
+    if request.method == 'POST':
+        try:
+            # Récupération des données envoyées par le formulaire
+            data = json.loads(request.body)
+            categorie_id = data['categorie_id']
+            niveau_id = data['niveau_id']
+            question_text = data['question_text']
+            choices = data['choices']
 
+            # Récupérer le questionnaire à partir de la catégorie et du niveau
+            questionnaire = Questionnaire.objects.get(categorie_id=categorie_id, niveau=niveau_id)
+
+            # Créer la question
+            question = Question.objects.create(
+                texte=question_text,
+                questionnaire=questionnaire
+            )
+
+            # Créer les choix de réponse
+            for choix in choices:
+                Choix.objects.create(
+                    texte=choix['text'],
+                    est_correct=choix['isCorrect'],
+                    question=question
+                )
+
+            # Retourner une réponse JSON de succès
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            print(e)
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def get_niveaux(request, categorie_id):
+    # Récupérer les niveaux distincts pour la catégorie donnée
+    niveaux = Questionnaire.objects.filter(categorie_id=categorie_id).values('niveau').distinct()
+
+    # Convertir les niveaux en liste de dictionnaires
+    niveaux_list = [{"id": niveau['niveau'], "nom": niveau['niveau']} for niveau in niveaux]
+    
+    return JsonResponse({"niveaux": niveaux_list})

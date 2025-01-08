@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     CategorieQuiz, Questionnaire, Question,
-    Choix, UserProfil, ResultatQuiz, 
+    Choix, UserProfil, ResultatQuiz, TemporaryCategory
 )
 
 # Configuration pour CategorieQuiz
@@ -59,3 +59,43 @@ class ResultatQuizAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'categorie__titre', 'niveau')  # Recherche dans les champs liés
     list_filter = ('niveau', 'categorie', 'termine')  # Filtrage selon certains champs
 
+@admin.register(TemporaryCategory)
+class TemporaryCategoryAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'niveau', 'nombre_questions', 'approuve', 'date_soumission')
+    list_filter = ('approuve', 'niveau')
+    actions = ['approuver_categories', 'refuser_categories', 'migrer_categories']
+
+    def approuver_categories(self, request, queryset):
+        """Action pour approuver les catégories sélectionnées"""
+        queryset.update(approuve=True)
+
+    def refuser_categories(self, request, queryset):
+        """Action pour refuser les catégories sélectionnées"""
+        queryset.delete()
+
+    def migrer_categories(self, request, queryset):
+        """Action pour migrer les données des catégories approuvées vers les autres tables"""
+        for category in queryset:
+            if category.approuve:
+                # Migrer vers CategorieQuiz
+                categorie_quiz = CategorieQuiz.objects.create(
+                    titre=category.titre,
+                    description=category.description,
+                    auteur=category.auteur  # Assurez-vous que chaque catégorie a un utilisateur associé
+                )
+
+                # Migrer vers Questionnaire
+                Questionnaire.objects.create(
+                    categorie=categorie_quiz,  # CategorieQuiz devient l'ID de catégorie
+                    niveau=category.niveau
+                )
+
+                # Optionnel : supprimez la catégorie temporaire après migration
+                category.delete()
+
+        self.message_user(request, "Les catégories ont été migrées avec succès!")
+
+    migrer_categories.short_description = 'Migrer les catégories approuvées vers les tables appropriées'
+    approuver_categories.short_description = 'Approuver les catégories sélectionnées'
+    refuser_categories.short_description = 'Refuser les catégories sélectionnées'
+#admin.site.register(TemporaryCategory, TemporaryCategoryAdmin)

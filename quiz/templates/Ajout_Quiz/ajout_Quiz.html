@@ -1,91 +1,75 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ajouter un Quiz - Quiz App</title>
+  <title>Ajouter une Catégorie - Quiz App</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-r from-pink-400 via-pink-500 to-indigo-600 min-h-screen">
-  <!-- Navbar -->
   <nav class="bg-gray-800 p-4 text-white fixed top-0 left-0 w-full z-10 shadow-lg">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <a href="index.html" class="text-2xl font-bold">Quiz App</a>
       <ul class="flex space-x-6">
-        <li><a href="index.html" class="hover:text-gray-300">Accueil</a></li>
-        <li><a href="categories.html" class="hover:text-gray-300">Catégories</a></li>
-        <li><a href="profil.html" class="hover:text-gray-300">Profil</a></li>
-        <li><a href="ajouter_quiz.html" class="hover:text-gray-300">Ajouter Quiz</a></li>
+        <li><a href="{% url 'home' %}" class="hover:text-gray-300">Accueil</a></li>
+        <li><a href="{% url 'category_list' %}" class="hover:text-gray-300">Catégories</a></li>
+        <li><a href="{% url 'profile' %}" class="hover:text-gray-300">Profil</a></li>
+        <li><a href="{% url 'ajouter_quiz' %}" class="hover:text-gray-300">Ajouter Quiz</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Contenu principal -->
   <div class="container mx-auto px-4 pt-24">
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl mx-auto">
-      <!-- En-tête -->
-      <div class="bg-gradient-to-r from-green-400 to-green-500 text-white text-center py-6">
-        <h1 class="text-3xl font-bold">Ajouter un Nouveau Quiz</h1>
-        <p class="mt-2 text-sm">Suivez les étapes pour créer un quiz</p>
-      </div>
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden max-w-4xl mx-auto p-8">
+      <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">Proposez une nouvelle catégorie de quiz</h1>
 
-      <!-- Barre de progression -->
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-semibold text-green-600">Étape 1 : Informations</span>
-          <span class="text-sm font-semibold text-gray-400">Étape 2 : Questions</span>
+      <!-- Affichage du message de succès -->
+      {% if messages %}
+        <div class="bg-green-500 text-white p-4 mb-4 rounded-lg">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
         </div>
-        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-          <div id="progress-bar" class="h-full bg-green-500 w-1/2 transition-all duration-500 ease-in-out"></div>
-        </div>
-      </div>
-
-      <!-- Formulaire -->
-      <form id="multi-step-form" class="p-6">
-        <!-- Étape 1 -->
-        <div id="step-1" class="step">
-          <div class="grid grid-cols-1 gap-6">
-            <div>
-              <label for="quizTitle" class="block text-sm font-medium text-gray-700">Titre du Quiz</label>
-              <input type="text" id="quizTitle" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Entrez le titre du quiz" required>
-            </div>
-            <div>
-              <label for="quizDescription" class="block text-sm font-medium text-gray-700">Description</label>
-              <textarea id="quizDescription" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" rows="3" placeholder="Entrez une description du quiz" required></textarea>
-            </div>
-            <div>
-              <label for="quizLevel" class="block text-sm font-medium text-gray-700">Niveau</label>
-              <select id="quizLevel" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" required>
-                <option value="" disabled selected>Choisissez un niveau</option>
-                <option value="facile">Facile</option>
-                <option value="moyen">Moyen</option>
-                <option value="difficile">Difficile</option>
-              </select>
-            </div>
-            <div>
-              <label for="quizQuestions" class="block text-sm font-medium text-gray-700">Nombre de Questions</label>
-              <input type="number" id="quizQuestions" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Entrez le nombre de questions" min="1" required>
-            </div>
-          </div>
+      {% endif %}
+      
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Champ pour le nom de la catégorie -->
+        <div class="space-y-2">
+          <label for="titre" class="block text-lg font-medium text-gray-700">Nom de la catégorie</label>
+          <input type="text" id="titre" name="titre" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Entrez le nom de la catégorie" required>
         </div>
 
-        <!-- Étape 2 -->
-        <div id="step-2" class="step hidden">
-          <div class="mb-6">
-            <label for="question" class="block text-sm font-medium text-gray-700">Question</label>
-            <input type="text" id="question" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Entrez la question" required>
-          </div>
+        <!-- Champ pour la description -->
+        <div class="space-y-2">
+          <label for="description" class="block text-lg font-medium text-gray-700">Description</label>
+          <textarea id="description" name="description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Donnez une brève description de la catégorie" required></textarea>
         </div>
 
-        <!-- Boutons de navigation -->
-        <div class="flex justify-between mt-8">
-          <button type="button" id="prevBtn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 hidden">Précédent</button>
-          <button type="button" id="nextBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Suivant</button>
-          <button type="submit" id="submitBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 hidden">Soumettre</button>
+        <!-- Champ pour le niveau de difficulté -->
+        <div class="space-y-2">
+          <label for="niveau" class="block text-lg font-medium text-gray-700">Niveau de difficulté</label>
+          <select id="niveau" name="niveau" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="facile">Facile</option>
+            <option value="moyen">Moyen</option>
+            <option value="difficile">Difficile</option>
+          </select>
+        </div>
+
+        <!-- Champ pour le nombre de questions -->
+        <div class="space-y-2">
+          <label for="nombre_questions" class="block text-lg font-medium text-gray-700">Nombre de questions</label>
+          <input type="number" id="nombre_questions" name="nombre_questions" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Entrez le nombre de questions" required>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="mt-4">
+          <button type="submit" class="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">Soumettre la catégorie</button>
         </div>
       </form>
     </div>
   </div>
+
 </body>
 </html>
