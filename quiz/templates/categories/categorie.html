@@ -1,18 +1,64 @@
-<link href="/static/quiz/css/categorie.css" rel="stylesheet" />
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catégories - Quiz App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-  {% for category in categories %}
-  <div class="card">
-      <div class="icon">
-          <i class="fas {{ category.icon }}"></i>
-      </div>
-      <h4>{{ category.titre }}</h4>
-      <p>{{ category.description }}</p>
-      <small>Créé par : {{ category.auteur }} le {{ category.date_creation|date:"d-m-Y" }}</small>
-      
-      <!-- Bouton pour accéder aux questionnaires -->
-      <a href="{% url 'questionnaires_by_category' category.id_cat %}" class="btn btn-primary">Voir les questionnaires</a>
+</head>
+<body class="bg-gradient-to-r from-green-400 via-green-500 to-blue-600 min-h-screen pt-16 flex flex-col justify-center items-center text-white">
+  <!-- Navbar -->
+  <nav class="bg-gray7 p-4 text-white w-full fixed top-0 left-0 z-10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="{% url 'home' %}" class="text-2xl font-bold">QuizIZI</a>
+      <ul class="flex space-x-6">
+        <a href="{% url 'home' %}" class="text-white hover:text-gray-600 mx-4">Accueil</a>
+        <a href="{% url 'category_list' %}" class="text-white hover:text-gray-600 mx-4">Catégories</a>
+        <a href="ajouter_quiz.html" class="text-white hover:text-gray-600 mx-4">Ajouter un Quiz</a>
+        <li class="relative">
+          <a href="#" class="text-white hover:text-gray-600 mx-4 flex items-center" id="userDropdown" aria-expanded="false">
+            <i class="fas fa-user-circle mr-2"></i> {{ user.username }}
+          </a>
+          <ul class="dropdown-menu absolute right-0 hidden bg-white text-gray-800 rounded-lg shadow-lg w-48 mt-2 py-2" aria-labelledby="userDropdown">
+            <li>
+              <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'profile' %}">
+                <i class="fas fa-user mr-2"></i> Profile
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="max-w-2xl bg-white rounded-lg shadow-2xl p-8 transform hover:scale-105 transition duration-300 ease-in-out">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Choisissez une catégorie</h1>
+    <ul class="space-y-4">
+      {% for category in categories %}
+        <li>
+          <a href="{% url 'questionnaires_by_category' category.id_cat %}" class="block w-full text-center bg-yellow-500 text-white py-3 rounded-lg hover:bg-yellow-600 transform hover:scale-105 transition duration-300 ease-in-out">
+            {{ category.titre }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
   </div>
-{% endfor %}
 
-
-
+  <!-- Ajouter le script juste avant la fermeture du body -->
+  <script>
+    document.getElementById('userDropdown').addEventListener('click', function (event) {
+      event.preventDefault();
+      const dropdownMenu = event.target.nextElementSibling;
+      dropdownMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

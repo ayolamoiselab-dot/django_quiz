@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f4f4f4;
+            border-radius: 4px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            text-decoration: none;
+            color: #fff;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Résultats pour le niveau {{ niveau|capfirst }} de la catégorie {{ categorie.titre }}</h2>
+        <ul>
+            <li><strong>Score obtenu :</strong> {{ score }}</li>
+            <li><strong>Score maximum :</strong> {{ score_max }}</li>
+            <li><strong>Pourcentage :</strong> {{ pourcentage|floatformat:2 }}%</li>
+        </ul>
+    
+       
+        <a href="{% url 'questionnaires_by_category' categorie.id_cat %}" class="btn btn-success">
+            Niveau suivant {{ niveau_suivant }}
+ 
+        </a>
+
+      
+    
+    </div>
+    
+</body>
+
+</html>

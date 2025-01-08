@@ -1,0 +1,22 @@
+<h1>Résultats pour la catégorie : {{ categorie.nom }}</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Niveau</th>
+            <th>Score</th>
+            <th>Terminé</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for niveau, resultat in resultats_par_niveau.items %}
+        <tr>
+            <td>{{ niveau }}</td>
+            <td>{{ resultat.score }}</td>
+            <td>{{ resultat.termine|yesno:"Oui,Non" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Score total : {{ score_total }}</h2>

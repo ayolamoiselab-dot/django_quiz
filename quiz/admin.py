@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     CategorieQuiz, Questionnaire, Question,
-    Choix, User, UserProfil, ResultatQuiz
+    Choix, UserProfil, ResultatQuiz, 
 )
 
 # Configuration pour CategorieQuiz
@@ -43,12 +43,6 @@ class ChoixAdmin(admin.ModelAdmin):
     search_fields = ('texte',)
 
 
-# Configuration pour User
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_staff', 'is_active')
-    search_fields = ('username', 'email')
-    list_filter = ('is_staff', 'is_active')
 
 
 # Configuration pour UserProfil
@@ -61,6 +55,7 @@ class UserProfilAdmin(admin.ModelAdmin):
 # Configuration pour ResultatQuiz
 @admin.register(ResultatQuiz)
 class ResultatQuizAdmin(admin.ModelAdmin):
-    list_display = ('user', 'categorie', 'score', 'date_passage')
-    search_fields = ('user__username', 'categorie__titre')
-    list_filter = ('date_passage', 'categorie')
+    list_display = ('user', 'categorie', 'niveau', 'score', 'score_cat', 'termine', 'date_passage')  # Liste des champs à afficher
+    search_fields = ('user__username', 'categorie__titre', 'niveau')  # Recherche dans les champs liés
+    list_filter = ('niveau', 'categorie', 'termine')  # Filtrage selon certains champs
+

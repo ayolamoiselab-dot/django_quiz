@@ -1,24 +1,62 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Questionnaires</title>
-    <link rel="stylesheet" href="/static/quiz/css/questionnaire.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Niveaux - Quiz App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 </head>
-<body>
-
-    <h2>Questionnaires pour la catégorie : {{ category.titre }}</h2>
-
-    <div class="card-container">
-        {% for questionnaire in questionnaires %}
-            <div class="card">
-                <h3>{{ questionnaire.titre }}</h3>
-                <p>Date de création : {{ questionnaire.date_creation|date:"d-m-Y" }}</p>
-                <a href="{% url 'questions_by_questionnaire' questionnaire.id_questionnaire %}" class="btn btn-primary">Voir les questions</a>
-            </div>
-        {% endfor %}
+<body class="bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-700 min-h-screen flex flex-col justify-center items-center text-white">
+  <nav class="bg-gray-800 p-4 text-white w-full fixed top-0 left-0 z-10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="{% url 'home' %}" class="text-2xl font-bold">QuizIZI</a>
+      <ul class="flex space-x-6">
+        <a href="{% url 'home' %}" class="text-white hover:text-gray-600 mx-4">Accueil</a>
+        <a href="{% url 'category_list' %}" class="text-white hover:text-gray-600 mx-4">Catégories</a>
+        <a href="ajouter_quiz.html" class="text-white hover:text-gray-600 mx-4">Ajouter un Quiz</a>
+        <li class="relative">
+            <a href="#" class="text-white hover:text-gray-600 mx-4 flex items-center" id="userDropdown" aria-expanded="false">
+              <i class="fas fa-user-circle mr-2"></i> {{ user.username }}
+            </a>
+            <ul class="dropdown-menu absolute right-0 hidden bg-white text-gray-800 rounded-lg shadow-lg w-48 mt-2 py-2" aria-labelledby="userDropdown">
+              <li>
+                <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'profile' %}">
+                  <i class="fas fa-user mr-2"></i> Profile
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'logout' %}">
+                  <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+        </li>
+      </ul>
     </div>
+  </nav>
+  <div class="max-w-2xl bg-white rounded-lg shadow-2xl p-8 transform hover:scale-105 transition duration-300 ease-in-out">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Choisissez un niveau</h1>
+    <ul class="space-y-4">
+        {% for questionnaire in questionnaires %}
+            <li>
+                <a href="{% url 'questions_by_questionnaire' questionnaire.id_questionnaire %}" class="block w-full text-center bg-yellow-500 text-white py-3 rounded-lg hover:bg-green-600 transform hover:scale-105 transition duration-300 ease-in-out">
+                    {{ questionnaire.niveau }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+  </div>
 
+  <script>
+    document.getElementById('userDropdown').addEventListener('click', function (event) {
+      event.preventDefault();
+      const dropdownMenu = event.target.nextElementSibling;
+      dropdownMenu.classList.toggle('hidden');
+    });
+  </script>
 </body>
 </html>

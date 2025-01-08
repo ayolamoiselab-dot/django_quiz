@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter un Quiz - Quiz App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body class="bg-gradient-to-r from-pink-400 via-pink-500 to-indigo-600 min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-gray7 p-4 text-white w-full fixed top-0 left-0 z-10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="{% url 'home' %}" class="text-2xl font-bold">QuizIZI</a>
+      <ul class="flex space-x-6">
+        <a href="{% url 'home' %}" class="text-white hover:text-gray-600 mx-4">Accueil</a>
+        <a href="{% url 'category_list' %}" class="text-white hover:text-gray-600 mx-4">Catégories</a>
+        <a href="ajouter_quiz.html" class="text-white hover:text-gray-600 mx-4">Ajouter un Quiz</a>
+        <li class="relative">
+          <a href="#" class="text-white hover:text-gray-600 mx-4 flex items-center" id="userDropdown" aria-expanded="false">
+            <i class="fas fa-user-circle mr-2"></i> {{ user.username }}
+          </a>
+          <ul class="dropdown-menu absolute right-0 hidden bg-white text-gray-800 rounded-lg shadow-lg w-48 mt-2 py-2" aria-labelledby="userDropdown">
+            <li>
+              <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'profile' %}">
+                <i class="fas fa-user mr-2"></i> Profile
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item px-4 py-2 hover:bg-gray-100 flex items-center" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Contenu principal -->
+  <div class="container mx-auto px-4 pt-24">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl mx-auto">
+      <!-- En-tête -->
+      <div class="bg-gradient-to-r from-green-400 to-green-500 text-white text-center py-6">
+        <h1 class="text-3xl font-bold">Ajouter un Nouveau Quiz</h1>
+        <p class="mt-2 text-sm">Suivez les étapes pour créer un quiz</p>
+      </div>
+
+      <!-- Formulaire -->
+      <form method="POST" id="multi-step-form" class="p-6">
+        {% csrf_token %}
+        <!-- Étape 1 -->
+        <div id="step-1" class="step">
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label for="quizTitle" class="block text-sm font-medium text-gray-700">Titre du Quiz</label>
+              <input type="text" id="quizTitle" name="quizTitle" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Entrez le titre du quiz" required>
+            </div>
+            <div>
+              <label for="quizDescription" class="block text-sm font-medium text-gray-700">Description</label>
+              <textarea id="quizDescription" name="quizDescription" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" rows="3" placeholder="Entrez une description du quiz" required></textarea>
+            </div>
+            <div>
+              <label for="quizLevel" class="block text-sm font-medium text-gray-700">Niveau</label>
+              <select id="quizLevel" name="quizLevel" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" required>
+                {% if niveaux %}
+                  {% for niveau in niveaux %}
+                    <option value="{{ niveau }}">{{ niveau|capfirst }}</option>
+                  {% endfor %}
+                {% else %}
+                  <option>Aucun niveau disponible</option>
+                {% endif %}
+              </select>
+            </div>
+            <div>
+              <label for="quizCategory" class="block text-sm font-medium text-gray-700">Catégorie</label>
+              <select id="quizCategory" name="quizCategory" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" required>
+                {% for categorie in categories %}
+                  <option value="{{ categorie.id_cat }}">{{ categorie.titre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="quizQuestions" class="block text-sm font-medium text-gray-700">Nombre de Questions</label>
+              <input type="number" id="quizQuestions" name="quizQuestions" class="w-full mt-1 p-2 border rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Entrez le nombre de questions" min="1" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons de navigation -->
+        <div class="flex justify-between mt-8">
+          <button type="button" id="prevBtn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 hidden">Précédent</button>
+          <button type="button" id="nextBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Suivant</button>
+          <button type="submit" id="submitBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 hidden">Soumettre</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('userDropdown').addEventListener('click', function (event) {
+      event.preventDefault();
+      const dropdownMenu = event.target.nextElementSibling;
+      dropdownMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

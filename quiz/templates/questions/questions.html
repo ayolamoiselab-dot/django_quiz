@@ -1,75 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Quiz App</title>
+  <script src="quiz.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
+  <div class="max-w-lg bg-white shadow-lg rounded-lg p-6">
 
-<link href="/static/quiz/css/questions.css" rel="stylesheet" />
-
-<h2>Questions pour le questionnaire : {{ questionnaire.titre }}</h2>
-<div id="question-container">
     {% for question in questions %}
+        
         <div class="question" id="question-{{ forloop.counter }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
-            <h3>{{ question.texte }}</h3>
-            <ul>
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Question {{ question.id_question }}</h1>
+
+            <p class="text-gray-600 mb-4" id="question">{{ question.texte }}</p>
+            <ul class="space-y-2">
                 {% for choix in question.choix.all %}
                     <li>
-                        <button onclick="checkAnswer(this, {{ choix.est_correct|yesno:'true,false' }})">
-                            {{ choix.texte }}
-                        </button>
+                        <button class="block w-full bg-gray-200 hover:bg-gray-300 text-left px-4 py-2 rounded" onclick="checkAnswer(this, {{ choix.est_correct|yesno:'true,false' }})">
+                            {{ choix.texte }}</button>
                     </li>
                 {% endfor %}
             </ul>
         </div>
+
     {% endfor %}
-</div>
-<div class="navigation">
-    <button id="prev" onclick="prevQuestion()" disabled>Précédent</button>
-    <button id="next" onclick="nextQuestion()">Suivant</button>
-</div>
+    <div class="navigation flex justify-between mt-6">
+        <button id="prev" onclick="prevQuestion()" disabled class="bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500 ">
+            Précédent
+        </button>
+        <button id="next" onclick="nextQuestion()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            Suivant
+        </button>
+        <button id="finish" onclick="finishQuiz()" style="display: none;" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+            Terminer
+        </button>
+    </div>
+    
+    
+  </div>
+</body>
+</html>
+        
 <script>
     let currentQuestion = 1;
-    const totalQuestions = {{ questions|length }};
-    
-    // Fonction pour afficher la question en cours
+    let score = 0;
+    const totalQuestions = {{ questions | length }};
+
     function showQuestion(index) {
         const questions = document.querySelectorAll('.question');
         questions.forEach((question, idx) => {
-            question.classList.remove('show');
-            if (idx + 1 === index) {
-                question.classList.add('show');
-            }
+            question.style.display = (idx + 1 === index) ? "block" : "none";
         });
-    
-        // Gérer l'état des boutons de navigation
-        document.getElementById("prev").disabled = index === 1;
-        document.getElementById("next").disabled = index === totalQuestions;
+
+        document.getElementById("prev").disabled = (index === 1);
+        document.getElementById("next").disabled = (index === totalQuestions);
+
+        if (index === totalQuestions) {
+            document.getElementById("finish").style.display = "inline-block";
+        } else {
+            document.getElementById("finish").style.display = "none";
+        }
     }
-    
-    // Fonction pour passer à la question suivante
+
     function nextQuestion() {
         if (currentQuestion < totalQuestions) {
             currentQuestion++;
             showQuestion(currentQuestion);
         }
     }
-    
-    // Fonction pour revenir à la question précédente
+
     function prevQuestion() {
         if (currentQuestion > 1) {
             currentQuestion--;
             showQuestion(currentQuestion);
         }
     }
-    
-    // Fonction pour vérifier la réponse
+
     function checkAnswer(button, isCorrect) {
         if (isCorrect) {
             button.style.backgroundColor = "green";
             alert("Bonne réponse !");
+            score++;
         } else {
             button.style.backgroundColor = "red";
             alert("Mauvaise réponse !");
         }
-        button.disabled = true;
+
+        // Désactiver tous les boutons de la question actuelle
+        const questionDiv = button.closest('.question');
+        const allButtons = questionDiv.querySelectorAll('button');
+        allButtons.forEach(btn => btn.disabled = true); // Grise tous les boutons
     }
-    
-    // Initialiser l'affichage de la première question
-    showQuestion(currentQuestion);
-    
+
+    function finishQuiz() {
+        const levelResultUrl = "{% url 'resultats_par_niveau' category_id=questionnaire.categorie.id_cat niveau=questionnaire.niveau %}?score=" + score;
+        window.location.href = levelResultUrl; // Redirige vers la page des résultats par niveau avec le score
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showQuestion(currentQuestion);
+    });
 </script>
