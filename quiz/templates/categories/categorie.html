@@ -40,17 +40,29 @@
   </nav>
 
   <div class="max-w-2xl bg-white rounded-lg shadow-2xl p-8 transform hover:scale-105 transition duration-300 ease-in-out">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Choisissez une catégorie</h1>
-    <ul class="space-y-4">
-      {% for category in categories %}
+  <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Choisissez une catégorie</h1>
+  <ul class="space-y-4">
+    {% for category in categories %}
+      {% if category.questionnaires.exists %}
         <li>
           <a href="{% url 'questionnaires_by_category' category.id_cat %}" class="block w-full text-center bg-yellow-500 text-white py-3 rounded-lg hover:bg-yellow-600 transform hover:scale-105 transition duration-300 ease-in-out">
             {{ category.titre }}
           </a>
         </li>
-      {% endfor %}
-    </ul>
-  </div>
+      {% else %}
+        <li>
+          <button 
+            onclick="alert('Cette catégorie ne contient pas encore de niveaux disponibles.')" 
+            class="block w-full text-center bg-gray-400 text-white py-3 rounded-lg cursor-not-allowed"
+            disabled>
+            {{ category.titre }}
+          </button>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
 
   <!-- Ajouter le script juste avant la fermeture du body -->
   <script>

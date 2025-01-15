@@ -12,6 +12,7 @@ from .models import TemporaryCategory
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Exists, OuterRef
 import json
 
 
@@ -36,7 +37,13 @@ def logout_view(request):
     return redirect('/')
 
 def category_list(request):
-    categories = CategorieQuiz.objects.all()
+    # Filtrer les catégories avec au moins un questionnaire associé
+    categories = CategorieQuiz.objects.annotate(
+        has_questionnaires=Exists(
+            Questionnaire.objects.filter(categorie_id=OuterRef('id_cat'))
+        )
+    ).filter(has_questionnaires=True)  # On ne sélectionne que celles avec des questionnaires
+
     return render(request, 'categories/categorie.html', {'categories': categories})
 
 def questionnaires_by_category(request, category_id):
