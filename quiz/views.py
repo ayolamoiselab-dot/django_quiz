@@ -61,15 +61,21 @@ def resultats_par_niveau(request, category_id, niveau):
     # Récupération de la catégorie
     categorie = get_object_or_404(CategorieQuiz, id_cat=category_id)
 
-    # Vérification de l'existence d'un questionnaire pour ce niveau
+    # Vérification de l'existence d'un questionnaire pour le niveau actuel
     questionnaire = Questionnaire.objects.filter(categorie=categorie, niveau=niveau).first()
-   
+    if not questionnaire:
+        messages.error(request, f"Aucun questionnaire trouvé pour la catégorie '{categorie.nom}' et le niveau '{niveau}'.")
+        return redirect('category_list')  # Exemple de redirection vers une liste des catégories
 
-    # Récupération du score de la requête GET
+    # Calcul du score
     score = int(request.GET.get('score', 0))
     score_max = questionnaire.questions.count()
 
-    pourcentage = (score / score_max) * 100 if score_max > 0 else 0
+    if score_max == 0:
+        messages.error(request, f"Le questionnaire pour le niveau '{niveau}' ne contient aucune question.")
+        return redirect('category_list')
+
+    pourcentage = (score / score_max) * 100
 
     # Sauvegarde ou mise à jour du résultat
     user = request.user
@@ -85,23 +91,22 @@ def resultats_par_niveau(request, category_id, niveau):
     if not created:
         resultat.score = pourcentage
         resultat.termine = True
-        resultat.save() 
+        resultat.save()
 
     # Détermination du niveau suivant
     niveaux = ['facile', 'intermediaire', 'avance']
-    index_niveau = niveaux.index(questionnaire.niveau)
+    try:
+        index_niveau = niveaux.index(niveau)
+    except ValueError:
+        messages.error(request, f"Niveau '{niveau}' invalide.")
+        return redirect('category_list')
+
     niveau_suivant = niveaux[index_niveau + 1] if index_niveau + 1 < len(niveaux) else None
+    questionnaire_suivant = None
 
     if niveau_suivant:
         questionnaire_suivant = Questionnaire.objects.filter(categorie=categorie, niveau=niveau_suivant).first()
-        if not questionnaire_suivant:
-        # Si aucun questionnaire n'est trouvé pour ce niveau, vous pouvez gérer l'erreur
-        # Par exemple, rediriger ou afficher un message d'erreur
-            return redirect('category_list')  # Exemple de redirection
-    else:
-        questionnaire_suivant = None  # Pas de questionnaire pour le niveau suivant
 
-   
     # Rendu du template
     return render(request, 'resultats/resultat.html', {
         'categorie': categorie,
@@ -112,8 +117,8 @@ def resultats_par_niveau(request, category_id, niveau):
         'niveau_suivant': niveau_suivant,
         'questionnaire': questionnaire,
         'questionnaire_suivant': questionnaire_suivant,
-
     })
+
 
 
 

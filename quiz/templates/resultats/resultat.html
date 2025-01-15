@@ -1,4 +1,3 @@
-                                                                                      
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -15,54 +14,56 @@
 
     <!-- Message personnalisé -->
     <div id="result-message" class="mb-6">
-      <p class="text-lg text-gray-700 font-medium">
-        Félicitations 🎉, vous avez obtenu :
-      </p>
+      {% if pourcentage >= 70 %}
+        <p class="text-lg text-green-700 font-medium">
+          Félicitations 🎉, vous avez réussi avec succès ce quiz !
+        </p>
+      {% elif pourcentage >= 50 %}
+        <p class="text-lg text-yellow-600 font-medium">
+          Pas mal 👏, mais vous pouvez faire encore mieux ! Réessayez pour améliorer votre score.
+        </p>
+      {% else %}
+        <p class="text-lg text-red-600 font-medium">
+          Dommage 😔, vous avez obtenu un score insuffisant. Ne vous découragez pas, continuez à vous entraîner !
+        </p>
+      {% endif %}
     </div>
 
     <!-- Affichage du score -->
-    <div class="bg-green-100 text-green-700 font-bold text-5xl py-6 px-4 rounded-lg shadow-inner mb-6">
-      <span id="score"> {{ score }}</span> / <span id="total">{{ score_max }}</span>
-    </div>
-
-    <!-- Message encouragement si le score est faible -->
-    <div id="encouragement-message" class="hidden text-gray-600 text-sm mb-6">
-      Ne vous découragez pas, continuez à vous entraîner !
+    <div class="bg-gray-100 text-gray-800 font-bold text-5xl py-6 px-4 rounded-lg shadow-inner mb-6">
+      <span id="score">{{ score }}</span> / <span id="total">{{ score_max }}</span>
     </div>
 
     <!-- Boutons -->
     <div class="flex justify-center space-x-4">
-      <button 
-        id="retryBtn" 
-        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none">
-        Niveau suivant {{ niveau_suivant }}
-      </button>
-      
+      {% if niveau_suivant and questionnaire_suivant %}
+        <button 
+          id="nextLevelBtn" 
+          class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none">
+          continuer
+        </button>
+      {% else %}
+        <button 
+          id="retryBtn" 
+          class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none">
+          continuer
+        </button>
+      {% endif %}
     </div>
   </div>
 
   <!-- Script -->
   <script>
-    // Variables pour le score et le total
-    const score = {{ score|default:0|safe }}; // Utilisez |default pour éviter les erreurs si score n'est pas défini
-    const total = {{ score_max|default:1|safe }}; // Évitez la division par zéro
-
-    // Mettez à jour les éléments de la page
-    document.getElementById('score').textContent = score;
-    document.getElementById('total').textContent = total;
-
-    // Afficher un message personnalisé en fonction du score
-    const resultMessage = document.getElementById('result-message');
-    const encouragementMessage = document.getElementById('encouragement-message');
-
-    if (score / total >= 0.7) {
-        resultMessage.innerHTML = '<p class="text-lg text-gray-700 font-medium">Bravo 🎉, vous avez réussi !</p>';
-    } else {
-        encouragementMessage.classList.remove('hidden');
-    }
-
-    document.getElementById('retryBtn').addEventListener('click', () => {
-    window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}";
-});
-
-</script>
+    // Redirige vers le prochain niveau ou rejoue le niveau actuel
+    {% if niveau_suivant and questionnaire_suivant %}
+      document.getElementById('nextLevelBtn').addEventListener('click', () => {
+        window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau_suivant }}";
+      });
+    {% else %}
+      document.getElementById('retryBtn').addEventListener('click', () => {
+        window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau }}";
+      });
+    {% endif %}
+  </script>
+</body>
+</html>

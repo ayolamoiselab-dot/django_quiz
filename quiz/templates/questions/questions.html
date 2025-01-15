@@ -4,103 +4,132 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz - Quiz App</title>
-  <script src="quiz.js" defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
-  <div class="max-w-lg bg-white shadow-lg rounded-lg p-6">
+  <div class="max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+    
+    <!-- Zone de feedback stylisée -->
+    <div id="feedback" class="hidden absolute top-0 left-0 w-full h-full bg-opacity-70 bg-gray-800 flex flex-col items-center justify-center z-10">
+      <div class="bg-white p-4 rounded shadow-md text-center">
+        <p id="feedback-message" class="text-lg font-semibold"></p>
+        <button onclick="closeFeedback()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          OK
+        </button>
+      </div>
+    </div>
 
     {% for question in questions %}
-        
-        <div class="question" id="question-{{ forloop.counter }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
-            <h1 class="text-2xl font-bold text-gray-800 mb-4">Question {{ question.id_question }}</h1>
+      <div class="question" id="question-{{ forloop.counter }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Question {{ question.id_question }}</h1>
 
-            <p class="text-gray-600 mb-4" id="question">{{ question.texte }}</p>
-            <ul class="space-y-2">
-                {% for choix in question.choix.all %}
-                    <li>
-                        <button class="block w-full bg-gray-200 hover:bg-gray-300 text-left px-4 py-2 rounded" onclick="checkAnswer(this, {{ choix.est_correct|yesno:'true,false' }})">
-                            {{ choix.texte }}</button>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-
+        <p class="text-gray-600 mb-4" id="question">{{ question.texte }}</p>
+        <ul class="space-y-2">
+          {% for choix in question.choix.all %}
+            <li>
+              <button 
+                class="block w-full bg-gray-200 hover:bg-gray-300 text-left px-4 py-2 rounded" 
+                onclick="checkAnswer(this, {{ choix.est_correct|yesno:'true,false' }}, {{ forloop.parentloop.counter }})">
+                {{ choix.texte }}
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     {% endfor %}
+
     <div class="navigation flex justify-between mt-6">
-        <button id="prev" onclick="prevQuestion()" disabled class="bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500 ">
-            Précédent
-        </button>
-        <button id="next" onclick="nextQuestion()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-            Suivant
-        </button>
-        <button id="finish" onclick="finishQuiz()" style="display: none;" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
-            Terminer
-        </button>
+      <button id="prev" onclick="prevQuestion()" disabled class="bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500">
+        Précédent
+      </button>
+      <button id="next" onclick="nextQuestion()" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+        Suivant
+      </button>
+      <button id="finish" onclick="finishQuiz()" style="display: none;" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+        Terminer
+      </button>
     </div>
-    
-    
   </div>
-</body>
-</html>
-        
-<script>
+
+  <script>
     let currentQuestion = 1;
     let score = 0;
     const totalQuestions = {{ questions | length }};
 
     function showQuestion(index) {
-        const questions = document.querySelectorAll('.question');
-        questions.forEach((question, idx) => {
-            question.style.display = (idx + 1 === index) ? "block" : "none";
+      const questions = document.querySelectorAll('.question');
+      questions.forEach((question, idx) => {
+        question.style.display = (idx + 1 === index) ? "block" : "none";
+      });
+
+      document.getElementById("prev").disabled = (index === 1);
+      document.getElementById("next").disabled = (index === totalQuestions);
+
+      if (index === totalQuestions) {
+        document.getElementById("finish").style.display = "inline-block";
+      } else {
+        document.getElementById("finish").style.display = "none";
+      }
+    }
+
+    function showFeedback(message) {
+      const feedback = document.getElementById("feedback");
+      const feedbackMessage = document.getElementById("feedback-message");
+      feedbackMessage.textContent = message;
+      feedback.classList.remove("hidden");
+    }
+
+    function closeFeedback() {
+      const feedback = document.getElementById("feedback");
+      feedback.classList.add("hidden");
+    }
+
+    function checkAnswer(button, isCorrect, questionIndex) {
+      const questionDiv = button.closest('.question');
+      const allButtons = questionDiv.querySelectorAll('button');
+
+      if (isCorrect) {
+        button.style.backgroundColor = "green";
+        showFeedback("Bonne réponse !");
+        score++;
+      } else {
+        button.style.backgroundColor = "red";
+        showFeedback("Mauvaise réponse ! La bonne réponse est surlignée.");
+        
+        // Mettre en surbrillance la bonne réponse
+        allButtons.forEach(btn => {
+          if (btn.onclick.toString().includes("true")) {
+            btn.style.backgroundColor = "green";
+          }
         });
+      }
 
-        document.getElementById("prev").disabled = (index === 1);
-        document.getElementById("next").disabled = (index === totalQuestions);
-
-        if (index === totalQuestions) {
-            document.getElementById("finish").style.display = "inline-block";
-        } else {
-            document.getElementById("finish").style.display = "none";
-        }
+      // Désactiver tous les boutons
+      allButtons.forEach(btn => btn.disabled = true);
     }
 
     function nextQuestion() {
-        if (currentQuestion < totalQuestions) {
-            currentQuestion++;
-            showQuestion(currentQuestion);
-        }
+      if (currentQuestion < totalQuestions) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+      }
     }
 
     function prevQuestion() {
-        if (currentQuestion > 1) {
-            currentQuestion--;
-            showQuestion(currentQuestion);
-        }
-    }
-
-    function checkAnswer(button, isCorrect) {
-        if (isCorrect) {
-            button.style.backgroundColor = "green";
-            alert("Bonne réponse !");
-            score++;
-        } else {
-            button.style.backgroundColor = "red";
-            alert("Mauvaise réponse !");
-        }
-
-        // Désactiver tous les boutons de la question actuelle
-        const questionDiv = button.closest('.question');
-        const allButtons = questionDiv.querySelectorAll('button');
-        allButtons.forEach(btn => btn.disabled = true); // Grise tous les boutons
+      if (currentQuestion > 1) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
     }
 
     function finishQuiz() {
-        const levelResultUrl = "{% url 'resultats_par_niveau' category_id=questionnaire.categorie.id_cat niveau=questionnaire.niveau %}?score=" + score;
-        window.location.href = levelResultUrl; // Redirige vers la page des résultats par niveau avec le score
+      const levelResultUrl = "{% url 'resultats_par_niveau' category_id=questionnaire.categorie.id_cat niveau=questionnaire.niveau %}?score=" + score;
+      window.location.href = levelResultUrl;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        showQuestion(currentQuestion);
+      showQuestion(currentQuestion);
     });
-</script>
+  </script>
+</body>
+</html>
