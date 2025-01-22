@@ -21,5 +21,7 @@ urlpatterns = [
     
     path('get_niveaux/<int:categorie_id>/', views.get_niveaux, name='get_niveaux'),
     path('ajouter_question/', views.ajouter_question, name='ajouter_question'),
+    path('save-answer/', views.save_answer, name='save_answer'),
+    path('questionnaire/apercu/<int:questionnaire_id>/', views.apercu_questions, name='apercu_questions'),
    
 ]

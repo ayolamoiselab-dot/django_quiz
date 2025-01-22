@@ -1,69 +1,146 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Score - Quiz App</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultat - Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .bounce-animation {
+            animation: bounce 2s infinite;
+        }
+        
+        .progress-bar {
+            transition: width 1.5s ease-in-out;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600 min-h-screen flex items-center justify-center">
-  <!-- Conteneur principal -->
-  <div class="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full text-center">
-    <!-- Titre -->
-    <h1 class="text-3xl font-bold mb-4 text-gray-800">Résultat du Quiz</h1>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen py-8 px-4">
+    <div class="container mx-auto max-w-4xl">
+        <!-- Carte principale -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+            <!-- En-tête avec confettis -->
+            <div class="text-center mb-8 relative">
+                <i class="fas fa-trophy text-yellow-400 text-4xl mb-4 bounce-animation"></i>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                    Félicitations !
+                </h1>
+                <p class="text-gray-600 mt-2">Vous avez terminé le quiz</p>
+            </div>
 
-    <!-- Message personnalisé -->
-    <div id="result-message" class="mb-6">
-      {% if pourcentage >= 70 %}
-        <p class="text-lg text-green-700 font-medium">
-          Félicitations 🎉, vous avez réussi avec succès ce quiz !
-        </p>
-      {% elif pourcentage >= 50 %}
-        <p class="text-lg text-yellow-600 font-medium">
-          Pas mal 👏, mais vous pouvez faire encore mieux ! Réessayez pour améliorer votre score.
-        </p>
-      {% else %}
-        <p class="text-lg text-red-600 font-medium">
-          Dommage 😔, vous avez obtenu un score insuffisant. Ne vous découragez pas, continuez à vous entraîner !
-        </p>
-      {% endif %}
+            <!-- Carte de score -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white mb-8 transform hover:scale-105 transition-transform duration-300">
+                <div class="text-center">
+                    <div class="text-2xl mb-2">Votre score</div>
+                    <div class="text-5xl font-bold mb-4">{{ score }} / {{ score_max }}</div>
+                    <div class="w-full bg-white/30 rounded-full h-4 mb-4">
+                        <div class="progress-bar bg-white rounded-full h-4" style="width: {{ pourcentage }}%"></div>
+                    </div>
+                    <div class="inline-block px-4 py-2 rounded-full {% if pourcentage >= 80 %}bg-green-500{% elif pourcentage >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %}">
+                        {{ pourcentage }}%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section des questions -->
+            <div class="space-y-6">
+                {% for item in recap_data %}
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 slide-in" style="animation-delay: {{ forloop.counter }}s">
+                    <!-- Numéro et texte de la question -->
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-bold">{{ forloop.counter }}</span>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-800">{{ item.question.texte }}</h2>
+                    </div>
+
+                    <!-- Liste des réponses -->
+                    <div class="ml-14">
+                        {% for choix in item.question.choix.all %}
+                        <div class="flex items-center p-3 rounded-lg mb-2 {% if item.user_answer == choix.texte %}bg-blue-50 border border-blue-200{% endif %} transition-colors duration-300">
+                            {% if item.correct_answer == choix.texte %}
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            {% elif item.user_answer == choix.texte and not item.is_correct %}
+                                <i class="fas fa-times-circle text-red-500 mr-3"></i>
+                            {% else %}
+                                <div class="w-6 mr-3"></div>
+                            {% endif %}
+                            <span class="{% if item.user_answer == choix.texte %}font-medium{% endif %}">
+                                {{ choix.texte }}
+                            </span>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Message de feedback -->
+                        <div class="mt-4 p-3 rounded-lg {% if item.is_correct %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                            <i class="{% if item.is_correct %}fas fa-thumbs-up{% else %}fas fa-info-circle{% endif %} mr-2"></i>
+                            {% if item.is_correct %}
+                                Excellent ! Votre réponse est correcte.
+                            {% else %}
+                                La bonne réponse était : {{ item.correct_answer }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Boutons de navigation -->
+            <div class="mt-8 flex justify-center space-x-4">
+                {% if niveau_suivant and questionnaire_suivant %}
+                    <a href="{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau_suivant }}"
+                        class="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                        <span class="relative z-10">Niveau suivant</span>
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </a>
+                {% else %}
+                    <a href="{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau }}"
+                        class="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                        <span class="relative z-10">Rejouer</span>
+                        <i class="fas fa-redo ml-2 group-hover:rotate-180 transition-transform duration-500"></i>
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <!-- Affichage du score -->
-    <div class="bg-gray-100 text-gray-800 font-bold text-5xl py-6 px-4 rounded-lg shadow-inner mb-6">
-      <span id="score">{{ score }}</span> / <span id="total">{{ score_max }}</span>
-    </div>
-
-    <!-- Boutons -->
-    <div class="flex justify-center space-x-4">
-      {% if niveau_suivant and questionnaire_suivant %}
-        <button 
-          id="nextLevelBtn" 
-          class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none">
-          continuer
-        </button>
-      {% else %}
-        <button 
-          id="retryBtn" 
-          class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none">
-          continuer
-        </button>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Script -->
-  <script>
-    // Redirige vers le prochain niveau ou rejoue le niveau actuel
-    {% if niveau_suivant and questionnaire_suivant %}
-      document.getElementById('nextLevelBtn').addEventListener('click', () => {
-        window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau_suivant }}";
-      });
-    {% else %}
-      document.getElementById('retryBtn').addEventListener('click', () => {
-        window.location.href = "{% url 'questionnaires_by_category' categorie.id_cat %}?niveau={{ niveau }}";
-      });
+    {% if pourcentage >= 80 %}
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        window.onload = function() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    </script>
     {% endif %}
-  </script>
 </body>
 </html>

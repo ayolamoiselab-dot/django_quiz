@@ -12,6 +12,7 @@ from .models import TemporaryCategory
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Exists, OuterRef
 import json
 
@@ -62,6 +63,40 @@ def questions_by_questionnaire(request, questionnaire_id):
         "questions": questions,
     })
 
+@ensure_csrf_cookie  # Utilisation du bon décorateur
+def save_answer(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            question_id = data.get('question_id')
+            answer = data.get('answer')
+            
+            # Stocker la réponse dans la session
+            if question_id and answer:
+                request.session[f'user_answer_{question_id}'] = answer
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Missing data'}, status=400)
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid method'}, status=405)
+
+
+def get_recap_data(questionnaire, session):
+    recap_data = []
+    for question in questionnaire.questions.all():
+        user_answer = session.get(f'user_answer_{question.id_question}', 'Aucune réponse')
+        correct_answer = question.choix.filter(est_correct=True).first()
+        recap_data.append({
+            'question': question,
+            'user_answer': user_answer,
+            'correct_answer': correct_answer.texte if correct_answer else "Aucune réponse",
+            'is_correct': user_answer == (correct_answer.texte if correct_answer else None),
+        })
+    return recap_data
+
 
 @login_required
 def resultats_par_niveau(request, category_id, niveau):
@@ -72,7 +107,7 @@ def resultats_par_niveau(request, category_id, niveau):
     questionnaire = Questionnaire.objects.filter(categorie=categorie, niveau=niveau).first()
     if not questionnaire:
         messages.error(request, f"Aucun questionnaire trouvé pour la catégorie '{categorie.nom}' et le niveau '{niveau}'.")
-        return redirect('category_list')  # Exemple de redirection vers une liste des catégories
+        return redirect('category_list')
 
     # Calcul du score
     score = int(request.GET.get('score', 0))
@@ -83,6 +118,21 @@ def resultats_par_niveau(request, category_id, niveau):
         return redirect('category_list')
 
     pourcentage = (score / score_max) * 100
+
+    # Récupération des réponses de l'utilisateur
+    # recap_data = []
+    # for question in questionnaire.questions.all():
+    #     user_answer = request.session.get(f'user_answer_{question.id_question}', 'Aucune réponse')
+    #     correct_answer = question.choix.filter(est_correct=True).first()
+        
+    #     recap_data.append({
+    #         'question': question,
+    #         'user_answer': user_answer,
+    #         'correct_answer': correct_answer.texte if correct_answer else "Aucune réponse",
+    #         'is_correct': user_answer == (correct_answer.texte if correct_answer else None)
+    #     })
+
+    recap_data = get_recap_data(questionnaire, request.session)
 
     # Sauvegarde ou mise à jour du résultat
     user = request.user
@@ -124,7 +174,9 @@ def resultats_par_niveau(request, category_id, niveau):
         'niveau_suivant': niveau_suivant,
         'questionnaire': questionnaire,
         'questionnaire_suivant': questionnaire_suivant,
+        'recap_data': recap_data,  # Ajouter les données du récapitulatif
     })
+
 
 
 
@@ -238,3 +290,22 @@ def get_niveaux(request, categorie_id):
     niveaux_list = [{"id": niveau['niveau'], "nom": niveau['niveau']} for niveau in niveaux]
     
     return JsonResponse({"niveaux": niveaux_list})
+
+
+def apercu_questions(request, questionnaire_id):
+    # Récupérer le questionnaire par ID
+    questionnaire = get_object_or_404(Questionnaire, id_questionnaire=questionnaire_id)
+    
+    # Récupérer toutes les questions liées au questionnaire
+    questions = questionnaire.questions.all()
+    
+    # Compter le nombre de questions
+    
+    nombre_questions = questions.count()
+    
+    # Passer les questions et le nombre de questions au template
+    return render(request, 'niveau/aperçu_questions.html', {
+        'questionnaire': questionnaire,
+        'questions': questions,
+        'nombre_questions': nombre_questions,
+    })

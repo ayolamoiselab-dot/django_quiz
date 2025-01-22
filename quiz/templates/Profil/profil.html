@@ -216,65 +216,66 @@
 </div>
 
               <!-- Champs de question et choix -->
-              <div class="mb-3">
-                <label for="question-text" class="form-label"
-                  >Texte de la question</label
-                >
-                <textarea
-                  id="question-text"
-                  class="form-control"
-                  required
-                ></textarea>
-              </div>
+             <!-- Champs de question et choix -->
+<div class="mb-3">
+  <label for="question-text" class="form-label">Texte de la question</label>
+  <textarea id="question-text" class="form-control" required></textarea>
+</div>
 
-              <div class="mb-3">
-                <label for="choix-1" class="form-label">Choix 1</label>
-                <input type="text" id="choix-1" class="form-control" required />
-                <input
-                  type="checkbox"
-                  id="choix-1-correct"
-                  class="form-check-input"
-                />
-                Correct
-              </div>
-              <div class="mb-3">
-                <label for="choix-2" class="form-label">Choix 2</label>
-                <input type="text" id="choix-2" class="form-control" required />
-                <input
-                  type="checkbox"
-                  id="choix-2-correct"
-                  class="form-check-input"
-                />
-                Correct
-              </div>
-              <div class="mb-3">
-                <label for="choix-3" class="form-label">Choix 3</label>
-                <input type="text" id="choix-3" class="form-control" required />
-                <input
-                  type="checkbox"
-                  id="choix-3-correct"
-                  class="form-check-input"
-                />
-                Correct
-              </div>
-              <div class="mb-3">
-                <label for="choix-4" class="form-label">Choix 4</label>
-                <input type="text" id="choix-4" class="form-control" required />
-                <input
-                  type="checkbox"
-                  id="choix-4-correct"
-                  class="form-check-input"
-                />
-                Correct
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Ajouter la question
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="mb-3">
+  <label for="choix-1" class="form-label">Choix 1</label>
+  <input type="text" id="choix-1" class="form-control" required />
+  <input
+    type="radio"
+    name="correct-choice"
+    id="choix-1-correct"
+    value="1"
+    class="form-check-input"
+  />
+  <label for="choix-1-correct" class="form-check-label">Correct</label>
+</div>
+
+<div class="mb-3">
+  <label for="choix-2" class="form-label">Choix 2</label>
+  <input type="text" id="choix-2" class="form-control" required />
+  <input
+    type="radio"
+    name="correct-choice"
+    id="choix-2-correct"
+    value="2"
+    class="form-check-input"
+  />
+  <label for="choix-2-correct" class="form-check-label">Correct</label>
+</div>
+
+<div class="mb-3">
+  <label for="choix-3" class="form-label">Choix 3</label>
+  <input type="text" id="choix-3" class="form-control" required />
+  <input
+    type="radio"
+    name="correct-choice"
+    id="choix-3-correct"
+    value="3"
+    class="form-check-input"
+  />
+  <label for="choix-3-correct" class="form-check-label">Correct</label>
+</div>
+
+<div class="mb-3">
+  <label for="choix-4" class="form-label">Choix 4</label>
+  <input type="text" id="choix-4" class="form-control" required />
+  <input
+    type="radio"
+    name="correct-choice"
+    id="choix-4-correct"
+    value="4"
+    class="form-check-input"
+  />
+  <label for="choix-4-correct" class="form-check-label">Correct</label>
+</div>
+
+<button type="submit" class="btn btn-primary">Ajouter la question</button>
+
 
     <!-- Script pour interactivité -->
     <script>

@@ -10,18 +10,18 @@
   <div class="max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
     
     <!-- Zone de feedback stylisée -->
-    <div id="feedback" class="hidden absolute top-0 left-0 w-full h-full bg-opacity-70 bg-gray-800 flex flex-col items-center justify-center z-10">
+    <!-- <div id="feedback" class="hidden absolute top-0 left-0 w-full h-full bg-opacity-70 bg-gray-800 flex flex-col items-center justify-center z-10">
       <div class="bg-white p-4 rounded shadow-md text-center">
         <p id="feedback-message" class="text-lg font-semibold"></p>
         <button onclick="closeFeedback()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           OK
         </button>
       </div>
-    </div>
+    </div> -->
 
     {% for question in questions %}
-      <div class="question" id="question-{{ forloop.counter }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Question {{ question.id_question }}</h1>
+      <div class="question" id="question-{{ forloop.counter }}" data-question-id="{{ question.id_question }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Question </h1>
 
         <p class="text-gray-600 mb-4" id="question">{{ question.texte }}</p>
         <ul class="space-y-2">
@@ -72,41 +72,63 @@
       }
     }
 
-    function showFeedback(message) {
-      const feedback = document.getElementById("feedback");
-      const feedbackMessage = document.getElementById("feedback-message");
-      feedbackMessage.textContent = message;
-      feedback.classList.remove("hidden");
-    }
+    // function showFeedback(message) {
+    //   const feedback = document.getElementById("feedback");
+    //   const feedbackMessage = document.getElementById("feedback-message");
+    //   feedbackMessage.textContent = message;
+    //   feedback.classList.remove("hidden");
+    // }
 
-    function closeFeedback() {
-      const feedback = document.getElementById("feedback");
-      feedback.classList.add("hidden");
-    }
+    // function closeFeedback() {
+    //   const feedback = document.getElementById("feedback");
+    //   feedback.classList.add("hidden");
+    // }
 
     function checkAnswer(button, isCorrect, questionIndex) {
-      const questionDiv = button.closest('.question');
-      const allButtons = questionDiv.querySelectorAll('button');
+  const questionDiv = button.closest('.question');
+  const allButtons = questionDiv.querySelectorAll('button');
+  const questionId = questionDiv.getAttribute('data-question-id'); // Ajoutez cet attribut à vos divs de questions
+  const selectedAnswer = button.textContent.trim();
 
-      if (isCorrect) {
-        button.style.backgroundColor = "green";
-        showFeedback("Bonne réponse !");
-        score++;
-      } else {
-        button.style.backgroundColor = "red";
-        showFeedback("Mauvaise réponse ! La bonne réponse est surlignée.");
-        
-        // Mettre en surbrillance la bonne réponse
-        allButtons.forEach(btn => {
-          if (btn.onclick.toString().includes("true")) {
-            btn.style.backgroundColor = "green";
-          }
-        });
+  // Stocker la réponse dans la session
+  fetch('{% url "save_answer" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      question_id: questionId,
+      answer: selectedAnswer,
+      is_correct: isCorrect
+    })
+  });
+
+  if (isCorrect) {
+    button.style.backgroundColor = "blue";
+    score++;
+  } else {
+    button.style.backgroundColor = "blue";
+  }
+
+  // Désactiver tous les boutons
+  allButtons.forEach(btn => btn.disabled = true);
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
-
-      // Désactiver tous les boutons
-      allButtons.forEach(btn => btn.disabled = true);
     }
+  }
+  return cookieValue;
+}
 
     function nextQuestion() {
       if (currentQuestion < totalQuestions) {
